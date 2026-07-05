@@ -96,11 +96,24 @@ function createFilePattern(baseFile: string): RegExp {
 }
 
 async function findAllLanguageFiles(baseFile: string): Promise<string[]> {
-	const filePattern = createFilePattern(baseFile);
+
+    console.log("11 findAllLanguageFiles baseFile ", baseFile);
+
+    const filePattern = createFilePattern(baseFile);
+
+    console.log("filePattern ", filePattern);
+
+    console.log("admin ", admin);
+
+    
 	const allJsonFiles = await glob(
 		path.join(admin, "**", "*.json").replace(/\\/g, "/"),
 		{ absolute: true },
-	);
+    );
+    
+
+
+    console.log("allJsonFiles ", allJsonFiles);
 
 	return allJsonFiles.filter(file => {
 		const match = file.match(filePattern);
@@ -579,16 +592,25 @@ async function translateI18n(baseFile: string): Promise<void> {
 	const filePattern = createFilePattern(baseFile);
 	const baseContent = await readJson(baseFile);
 	const baseIndentation = await getFileIndentation(baseFile);
-	const missingLanguages = new Set<ioBroker.Languages>(translateLanguages);
-	const files = await findAllLanguageFiles(baseFile);
+    const missingLanguages = new Set<ioBroker.Languages>(translateLanguages);
+
+    console.log("11 missingLanguages " , missingLanguages );
+
+    const files = await findAllLanguageFiles(baseFile);
+
+    console.log("11 existing files ", files);
+
+
 	for (const file of files) {
 		const match = file.match(filePattern);
-		if (!match) {
+        if (!match) {
+            console.log(`File ${file} does not match the expected pattern for base file ${baseFile}`);
 			continue;
 		}
 		const lang = match[2] as ioBroker.Languages;
 		missingLanguages.delete(lang);
-		if (lang === "en") {
+        if (lang === "en") {
+            console.log(`Skipping English file ${file} for translation`);
 			continue;
 		}
 		const translation = await readJson(file);
@@ -598,10 +620,16 @@ async function translateI18n(baseFile: string): Promise<void> {
 			EOL,
 		});
 		console.log(`Successfully updated ${path.relative(".", file)}`);
-	}
+    }
+
+    console.log("22 missingLanguages ", missingLanguages);
+
 	for (const lang of missingLanguages) {
 		const translation: Record<string, string> = {};
-		await translateI18nJson(translation, lang, baseContent);
+        await translateI18nJson(translation, lang, baseContent);
+
+        //console.log(`Creating new translation file for missing language ` , translation);
+
 		const filename = baseFile.replace(filePattern, `$1${lang}$3`);
 		await ensureDir(path.dirname(filename));
 		await writeJson(filename, sortObjectKeys(translation), {
@@ -617,7 +645,18 @@ async function translateI18nJson(
 	lang: ioBroker.Languages,
 	baseContent: Readonly<Record<string, string>>,
 ): Promise<void> {
-	if (lang === "en") {
+    if (lang === "en") {
+
+        console.log(`Skipping translation for English language`);
+
+        for (const [t, base] of Object.entries(baseContent)) {
+            if (!content[t]) {
+                content[t] = base;
+            }
+        }
+
+        //console.log(`Content for English language:`, content);
+
 		return;
 	}
 	const time = new Date().getTime();
