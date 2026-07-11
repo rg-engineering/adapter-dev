@@ -97,13 +97,13 @@ function createFilePattern(baseFile: string): RegExp {
 
 async function findAllLanguageFiles(baseFile: string): Promise<string[]> {
 
-    console.log("11 findAllLanguageFiles baseFile ", baseFile);
+    //console.log("11 findAllLanguageFiles baseFile ", baseFile);
 
     const filePattern = createFilePattern(baseFile);
 
-    console.log("filePattern ", filePattern);
+    //console.log("filePattern ", filePattern);
 
-    console.log("admin ", admin);
+    //console.log("admin ", admin);
 
     
 	const allJsonFiles = await glob(
@@ -113,7 +113,7 @@ async function findAllLanguageFiles(baseFile: string): Promise<string[]> {
     
 
 
-    console.log("allJsonFiles ", allJsonFiles);
+    //console.log("allJsonFiles ", allJsonFiles);
 
 	return allJsonFiles.filter(file => {
 		const match = file.match(filePattern);
@@ -622,7 +622,7 @@ async function translateI18n(baseFile: string): Promise<void> {
 		console.log(`Successfully updated ${path.relative(".", file)}`);
     }
 
-    console.log("22 missingLanguages ", missingLanguages);
+    //console.log("22 missingLanguages ", missingLanguages);
 
 	for (const lang of missingLanguages) {
 		const translation: Record<string, string> = {};
